@@ -1,8 +1,8 @@
-# Profile
+## Profile
 
 A simple shell tool to assist with creating and loading `.env` files
 
-#### Installation
+### Installation
 
 Clone this repository somewhere and then edit your `~/.bashrc` or `~/.zshrc`
 
@@ -10,7 +10,9 @@ Clone this repository somewhere and then edit your `~/.bashrc` or `~/.zshrc`
 source <checkout_dir>/profile.sh
 ```
 
-#### Usage
+### Usage
+
+#### Creating Environments
 
 Create or edit an `.env` file in the current working directory
 
@@ -25,6 +27,8 @@ By creating a symlink you can then refer to that environment from anywhere on th
 ```
 profile init example
 ```
+
+#### Sourcing Environments
 
 Source an environment file. Starting with the current working directory and continuing up the parent directory tree until it finds a `.env` file
 
