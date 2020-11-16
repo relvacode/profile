@@ -131,14 +131,16 @@ __env_main_ls() {
 }
 
 __env_main_source() {
-	local _path=$(__env_main_path "$@") || return $?
+	_path=$(__env_main_path "$@") || return $?
+	
 	pushd "$(dirname "$_path")" >/dev/null
 	__env_source "$_path"
 	popd >/dev/null
 }
 
 __env_main_switch() {
-	local _path=$(__env_main_path "$@") || return $?	
+	_path=$(__env_main_path "$@") || return $?	
+	
 	cd "$(dirname "$_path")"
 	__env_source "$_path"
 }
