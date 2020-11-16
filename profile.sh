@@ -1,4 +1,23 @@
+# Profile Script
+# (c) Jason Kingsbury 2020
+#
+# Create and manage environment profiles.
+# Environments are files that can be sourced by the shell to load context specific environment variables
+# or other forms of scripts associated with a given directory context.
+#
+# Contains methods for listing, editing and sourcing those environment contexts,
+# as well as linking contexts to a global profile directory which can be referenced from anywhere on the filesystem.
+#
+# Installation:
+#     Add `source <checkout_dir>/profile.sh` to your shell's login script
+#     Run `profile` to see available options
+#
+
+
+# The path on the filesystem that defines the where links to named environment profiles are created
 ENVIRONMENTS_DIR="${HOME}/.environments"
+
+# The name of the environment file within its parent context
 ENV_FILE=".env"
 
 test -d "${ENVIRONMENTS_DIR}" || mkdir "${ENVIRONMENTS_DIR}"
@@ -75,6 +94,13 @@ __env_edit() {
 	mv "$temp_path" "$target"
 }
 
+__env_source() {
+	set -o localoptions
+	set -o allexport
+	
+	source "${1}"
+}
+
 __env_main_path() {
         if [ -n "$1" ]; then
                 __env_named "$1"; return $?
@@ -83,7 +109,7 @@ __env_main_path() {
 	__env_path_tree; return $?
 }
 
-__env_main_init() {
+__env_main_edit() {
 	EDITOR=${EDITOR:-vi}
 	
 
@@ -98,17 +124,23 @@ __env_main_init() {
 	
 }
 
+__env_main_ls() {
+	for _profile in $(ls -1 "${ENVIRONMENTS_DIR}"); do
+		echo "$(basename "${_profile}")\t$(readlink "${ENVIRONMENTS_DIR}/${_profile}")"
+	done
+}
+
 __env_main_source() {
 	local _path=$(__env_main_path "$@") || return $?
 	pushd "$(dirname "$_path")" >/dev/null
-	source "$_path"
+	__env_source "$_path"
 	popd >/dev/null
 }
 
 __env_main_switch() {
 	local _path=$(__env_main_path "$@") || return $?	
 	cd "$(dirname "$_path")"
-	source "$_path"
+	__env_source "$_path"
 }
 
 
@@ -122,16 +154,21 @@ Arguments:
 
 Commands:
 
-init [link]
+ls
+	List stored environment profiles within ${ENVIRONMENTS_DIR}
+
+edit   [link]
 	Create or edit an environment file within the current working directory.
 	If one doesn't exist then it is created. 
-	If [link] is supplied then a symlink is created in ${ENVIRONMENTS_DIR}
+	If [link] is supplied then a symlink is created in ${ENVIRONMENTS_DIR}.
+	EDTIOR can be supplied as an environment variable to change the editor
 
-path [name]
+path   [name]
 	Get the path for an environment file
 
 source [name]
-	Source an environment file
+	Source an environment file.
+	Assignments are exported automatically.
 
 switch [name]
 	Source an evironment file and then switch to its parent directory
@@ -143,7 +180,7 @@ EOF
 profile() {
 	local _command=$1
 	case $_command in
-		"" | "-h" | "--help" )
+		"" | "help" )
 			__env_help
 			;;
 	*)
