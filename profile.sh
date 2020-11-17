@@ -132,10 +132,11 @@ __env_main_ls() {
 
 __env_main_source() {
 	_path=$(__env_main_path "$@") || return $?
-	
-	pushd "$(dirname "$_path")" >/dev/null
+	_cwd=$(pwd)
+
+	cd "$(dirname "$_path")"
 	__env_source "$_path"
-	popd >/dev/null
+	cd "$_cwd"
 }
 
 __env_main_switch() {
